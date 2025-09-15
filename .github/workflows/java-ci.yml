@@ -1,0 +1,39 @@
+name: Java CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up JDK
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Step 3: Compile all Java files
+      - name: Compile Java files
+        run: |
+          mkdir -p out
+          javac -d out $(find . -name "*.java")
+
+      # Step 4: Run Main class (optional, adjust if your main class is different)
+      - name: Run Main class
+        run: |
+          if [ -f out/Main.class ]; then
+            echo "Running Main class..."
+            java -cp out Main
+          else
+            echo "No Main class found. Skipping execution."
+          fi

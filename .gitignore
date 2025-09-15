@@ -1,0 +1,25 @@
+*.class
+
+/out/
+bin/
+
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+*.jar
+
+# Logs
+*.log
+
+*.tmp
+*.temp
+
+target/
+build/
