@@ -13,75 +13,53 @@ public class SentenceLoader {
         loadSentences();
     }
 
+    private void loadSentences() {
+        try {
+            // Try multiple approaches to find the file
+            InputStream input = null;
+            
+            // Try 1: Direct file path
+            File file = new File("src/main/resources/" + filename);
+            if (file.exists()) {
+                input = new FileInputStream(file);
+            }
+            
+            // Try 2: Class loader
+            if (input == null) {
+                input = getClass().getClassLoader().getResourceAsStream(filename);
+            }
+            
+            // Try 3: Absolute class path
+            if (input == null) {
+                input = getClass().getResourceAsStream("/" + filename);
+            }
 
-private void loadSentences() {
-    try {
-        // Use absolute path from resources
-        String resourcePath = "/main/resources/" + filename;
-        InputStream input = getClass().getResourceAsStream(resourcePath);
-        
-        if (input == null) {
-            // Try without main/resources prefix
-            input = getClass().getResourceAsStream("/" + filename);
-        }
-        
-        if (input == null) {
-            System.err.println("Could not find resource: " + filename);
-            addDefaultSentences();
-            return;
-        }
+            if (input == null) {
+                throw new FileNotFoundException("Could not find resource: " + filename);
+            }
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                if (!line.isEmpty()) {
-                    sentences.add(line);
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    line = line.trim();
+                    if (!line.isEmpty()) {
+                        sentences.add(line);
+                    }
                 }
             }
-        }
-    } catch (IOException e) {
-        System.err.println("Error reading file: " + filename + "\n" + e.getMessage());
-        addDefaultSentences();
-    }
-    
-    if (sentences.isEmpty()) {
-        addDefaultSentences();
-    }
-}
 
+            if (sentences.isEmpty()) {
+                throw new IOException("No sentences found in file: " + filename);
+            }
 
-    private void addDefaultSentences() {
-        if (filename.contains("easy")) {
-            sentences.addAll(Arrays.asList(
-                "The cat sat on the mat.",
-                "Java is fun to learn.",
-                "I love coding games.",
-                "The sun is bright today.",
-                "Dogs are loyal friends."
-            ));
-        } else if (filename.contains("medium")) {
-            sentences.addAll(Arrays.asList(
-                "Programming requires patience and practice.",
-                "The quick brown fox jumps over the lazy dog.",
-                "Software development is both art and science.",
-                "Debugging is twice as hard as writing code.",
-                "Code is read more often than it is written."
-            ));
-        } else {
-            sentences.addAll(Arrays.asList(
-                "Object-oriented programming paradigms facilitate modular design.",
-                "Algorithmic complexity analysis determines computational efficiency.",
-                "Polymorphism enables dynamic method resolution at runtime.",
-                "Encapsulation provides data abstraction and information hiding.",
-                "Inheritance promotes code reusability and hierarchical relationships."
-            ));
+        } catch (IOException e) {
+            throw new RuntimeException("Error loading sentences from " + filename + ": " + e.getMessage());
         }
     }
 
     public String getRandomSentence() {
         if (sentences.isEmpty()) {
-            return "No sentences available!";
+            throw new IllegalStateException("No sentences available!");
         }
         Random rand = new Random();
         return sentences.get(rand.nextInt(sentences.size()));
